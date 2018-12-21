@@ -148,7 +148,7 @@ class King(Piece):
                            (1,0), (1,1)]
         self.has_moved = False
 
-    def get_actions(self, state_mask, enemypieces):
+    def get_actions(self, P1, P2):
         for (i,j) in self.directions:
             new_pos = (self.pos[0] + i, self.pos[1] + j)
             if self.is_valid(new_pos):
@@ -204,7 +204,30 @@ class Pawn(Piece):
         self.has_2spaced = False
 
     def get_actions(self, P1, P2):
-        # if in initial position
+        if self.is_p1:
+            player, enemy = P1, P2
+        else:
+            player, enemy = P2, P1
+        
+        actions = []
+        # new forward and diagonal positions
+        [new_pos, new_diag_l, new_diag_r] = 
+            [[self.pos[0] + self.direction, self.pos[1] + i]
+             for i in [0, -1, 1]]
+
+        # moving forward one space
+        if self.is_valid(new_pos) and \
+           new_pos not in player.get_positions() and \
+           new_pos not in enemy.get_positions():
+            actions+= new_pos
+        
+        # taking diagonally
+        for new_diag in [new_diag_l, new_diag_r]:
+            if self.is_valid(new_pos) and \
+               new_diag in enemy.get_positions():
+                actions+= new_pos
+
+        # moving 2 spaces on first go
         if self.pos[0] == 1 + 5*self.is_p1:
             #2space logic here
             pass
@@ -212,10 +235,17 @@ class Pawn(Piece):
             #enpassant logic here
             pass
 
-
+        
 G1 = Game()
+G1.P1.pieces.append(Rook([2,2]))
+G1.P1.pieces.append(Queen([3,3]))
+
+G1.P2.pieces.append(Rook([3,1]))
+G1.P2.pieces[-1].is_p1 = False
+G1.P2.pieces[-1].is_white = False
 G1.display_board()
-actions = G1.P2.pieces[8].get_actions(G1.P1, G1.P2)
-print(G1.to_board_notation(G1.P2.pieces[8].pos))
+
+print(G1.to_board_notation(G1.P1.pieces[-1].pos),'\n')
+actions = G1.P1.pieces[-1].get_actions(G1.P1, G1.P2)
 for a in actions:
   print(G1.to_board_notation(a))
